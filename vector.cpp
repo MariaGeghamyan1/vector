@@ -128,6 +128,9 @@ class MyVector {
 			data = new_data;
 			capacity = size;
 		}
+		void pop_back() {
+			--size;
+		}
 };
 
 
