@@ -25,7 +25,7 @@ class MyVector {
 		}
 
 		MyVector(const MyVector & other) : size{other.size}, capacity{other.capacity} {
-			this -> data = new int(other.size);
+			this -> data = new int[other.size];
 			for(int i = 0; i < other.size; ++i) {
 				this -> data[i] = other.data[i];
 			}
@@ -49,7 +49,7 @@ class MyVector {
 				delete[] data;
 			}
 			this -> size = other.size;
-			this -> capacity = other.size;
+			this -> capacity = other.capacity;
 			data = new int[size];
 			for(int i = 0; i < size; ++i) {
 				this -> data[i] = other.data[i];
@@ -57,6 +57,27 @@ class MyVector {
                 	std::cout << "Copy assignment operator" << std::endl;
 			return *this;
 		}
+
+		MyVector(MyVector && other) : size{other.size}, capacity{other.capacity}, data{other.data} {
+			other.data = nullptr;
+			other.size = 0;
+    			other.capacity = 0;
+    			std::cout << "Move constructor" << std::endl;
+		}
+			
+		MyVector &operator=(MyVector && other) {
+			if(this == &other) return *this;
+		 	delete[] data;
+			data = other.data;
+			size = other.size;
+			capacity = other.capacity;
+
+			other.data = nullptr;
+			other.size = 0;
+			other.capacity = 0;
+
+			return *this;
+		}	
 
 		~MyVector() {
 			delete[] data; 
@@ -128,8 +149,129 @@ class MyVector {
 			data = new_data;
 			capacity = size;
 		}
-		void pop_back() {
+		void clear() {
+			size = 0;
+		}
+
+		size_t insert(size_t pos, int val) {
+			if(pos > size) return size;
+			if(size == capacity) {
+				reserve(capacity + 1);
+			}
+			for(size_t i = size; i > pos; --i) {
+				data[i] = data[i - 1];
+			}
+			data[pos] = val;
+			return pos;		
+		}
+
+		size_t insert(size_t pos, size_t count, int val) {
+                        if(pos > size) return size;
+                        if(size == capacity) {
+                                reserve(capacity + count);
+                        }               
+                        for(size_t i = size; i > pos; --i) {
+                                data[i + count - 1] = data[i - 1];
+                        }               
+                        for(int i = pos; i < pos + count; ++i) {
+				data[i] = val;
+			}
+                        return pos;
+                }
+
+		size_t insert(size_t pos, std::initializer_list<int> ilist) {
+			if(pos > size) return size;
+			size_t count = ilist.size();
+			if(size + count > capacity) {
+				reserve(size + count);
+			}
+			for(size_t i = size; i > pos; --i) {
+				data[i + count - 1] = data[i - 1];
+			}
+			int index = pos;
+			for(int elem : ilist) {
+				data[index++] = elem;
+			}
+			size += count;
+			return pos;
+		}
+
+		size_t erase(size_t pos) {
+			if(pos > size) return size;
+			for(size_t i = pos; i < size; ++i) {
+				data[i] = data[i + 1];
+			}
 			--size;
+			return pos;
+		}
+
+		size_t erase(size_t first, size_t last) {
+			if(last > size) return size;
+			size_t count = last - first;
+			for(size_t i = last; i <= size; ++i) {
+			       data[i - count] = data[i];
+			}
+			size -= count;
+			return first;	
+		}
+	
+		void push_back(int val) {
+			if(size == capacity) reserve(capacity + 1);
+			data[size] = val;
+			++size;
+			return;
+		}
+
+		void resize(size_t count) {
+			if(count <= size) {
+				size = count;     
+				return;
+			}
+			if(count > capacity) {
+				reserve(count);
+			}
+			for(size_t i = size; i < count; ++i) {
+				data[i] = 0;
+			}
+			size = count;
+			return;
+		}
+
+		void resize(size_t count, int val) {
+                        if(count <= size) {
+                                size = count;
+                                return;
+                        }
+                        if(count > capacity) {
+                                reserve(count);
+                        }
+                        for(size_t i = size; i < count; ++i) {
+                                data[i] = val;
+                        }
+                        size = count;
+                        return;
+		}
+
+		void swap(MyVector& other) {
+
+			int * tmp_data = data;
+			data = other.data;
+			other.data = tmp_data;
+
+			size_t tmp_size = size;
+			size = other.size;
+			other.size = tmp_size;
+
+			size_t tmp_cap = capacity;
+			capacity = other.capacity;
+			other.capacity = tmp_cap;
+
+			return;
+		}
+
+		void pop_back() {
+			if(size > 0)
+				--size;
 		}
 };
 
